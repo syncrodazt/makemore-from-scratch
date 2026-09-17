@@ -57,11 +57,47 @@
 
 ## Running it
 
+One venv, two platforms. The only real difference is where the venv puts its
+binaries: `.venv/bin/` on macOS and Linux, `.venv/Scripts/` on Windows.
+
+**macOS / Linux**
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m pytest -x
+```
+
+**Windows (PowerShell or cmd)**
+
 ```bash
 python -m venv .venv
 .venv/Scripts/python.exe -m pip install -r requirements.txt
 .venv/Scripts/python.exe -m pytest -x
 ```
+
+Calling the venv's interpreter by path means no `activate` step and no way to
+install into the system Python by accident. If you would rather activate it,
+`source .venv/bin/activate` (macOS/Linux) or `.venv\Scripts\Activate.ps1`
+(PowerShell) — after that plain `python` and `pytest` are the venv's.
+
+For the notebook, register the venv as a kernel once, then pick
+`makemore` in the Jupyter/VS Code kernel picker:
+
+```bash
+.venv/bin/python -m ipykernel install --user --name makemore   # Windows: .venv/Scripts/python.exe
+```
+
+Notes:
+
+- `requirements.txt` is a pinned freeze. The pins resolve on both platforms —
+  `torch==2.13.0` has wheels for Windows x86-64 and macOS arm64 alike, so the
+  same file works untouched.
+- On Apple Silicon, `torch.backends.mps.is_available()` is `True`. Nothing here
+  needs it — the models are small enough to stay on CPU — but a `.to("mps")`
+  is there if a run gets slow.
+- `pytest` exits with code 5 and "no tests ran" until `tests/` has something in
+  it. That is the expected state of a repo that starts empty.
 
 ## Where this sits
 
